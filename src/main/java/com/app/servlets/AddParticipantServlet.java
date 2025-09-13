@@ -1,0 +1,33 @@
+package com.app.servlets;
+
+import com.app.util.DBConnection;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@WebServlet("/AddParticipantServlet")
+public class AddParticipantServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        try (Connection conn = DBConnection.getConnection()) {
+            String sql = "INSERT INTO Users (username, password_hash, role) VALUES (?, ?, 'Participant')";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ps.executeUpdate();	
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        response.sendRedirect("LyricAdminServlet");
+    }
+}
