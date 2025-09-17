@@ -33,7 +33,6 @@ public class ReactionServlet extends HttpServlet {
             ps1.setInt(2, lyricId);
             ps1.executeUpdate();
 
-            // Insert new reaction
             String insertSql = "INSERT INTO Reactions(user_id, lyric_id, reaction_type) VALUES (?, ?, ?)";
             PreparedStatement ps2 = conn.prepareStatement(insertSql);
             ps2.setInt(1, userId);
@@ -41,7 +40,7 @@ public class ReactionServlet extends HttpServlet {
             ps2.setString(3, reactionType);
             ps2.executeUpdate();
 
-            // ✅ After inserting, check if dislikes > 20 → hide lyric
+
             String checkSql = "SELECT COUNT(*) FROM Reactions WHERE lyric_id=? AND reaction_type='downvote'";
             PreparedStatement cps = conn.prepareStatement(checkSql);
             cps.setInt(1, lyricId);
@@ -50,7 +49,6 @@ public class ReactionServlet extends HttpServlet {
             if (crs.next()) {
             	int downvotes = crs.getInt(1);
 
-                // ✅ Get current override status
                 String statusSql = "SELECT is_override_visible FROM Lyrics WHERE lyric_id=?";
                 PreparedStatement sps = conn.prepareStatement(statusSql);
                 sps.setInt(1, lyricId);
@@ -61,7 +59,6 @@ public class ReactionServlet extends HttpServlet {
                     overrideVisible = srs.getBoolean("is_override_visible");
                 }
 
-                // ✅ Apply auto-hide only if admin has NOT forced visible
                 if (downvotes >= 5 && !overrideVisible) {
                     String hideSql = "UPDATE Lyrics SET is_hidden=TRUE, is_override_visible=FALSE WHERE lyric_id=?";
                     PreparedStatement ups = conn.prepareStatement(hideSql);

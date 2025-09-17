@@ -1,6 +1,7 @@
 package com.app.servlets;
 
 import com.app.util.DBConnection;
+import com.app.util.PasswordUtil;
 import java.io.IOException;
 import java.sql.*;
 
@@ -24,10 +25,11 @@ public class UpdateParticipantServlet extends HttpServlet {
             PreparedStatement ps;
 
             if (password != null && !password.isEmpty()) {
+                String hashedPassword = PasswordUtil.hashPassword(password);
                 sql = "UPDATE Users SET username=?, password_hash=? WHERE user_id=? AND role='Participant'";
                 ps = conn.prepareStatement(sql);
                 ps.setString(1, username);
-                ps.setString(2, password); // hash later if needed
+                ps.setString(2, hashedPassword);
                 ps.setInt(3, userId);
             } else {
                 sql = "UPDATE Users SET username=? WHERE user_id=? AND role='Participant'";
@@ -39,6 +41,7 @@ public class UpdateParticipantServlet extends HttpServlet {
             ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
+            throw new ServletException(e);
         }
 
         response.sendRedirect("LyricAdminServlet");

@@ -1,6 +1,8 @@
 package com.app.servlets;
 
 import com.app.util.DBConnection;
+import com.app.util.PasswordUtil;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,10 +22,12 @@ public class AddAdminServlet extends HttpServlet {
 
         try (Connection conn = DBConnection.getConnection()) {
             String sql = "INSERT INTO Users (username, password_hash, role) VALUES (?, ?, 'Admin')";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
-            ps.setString(2, password);
-            ps.executeUpdate();	
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                String hashedPassword = PasswordUtil.hashPassword(password);
+                ps.setString(1, username);
+                ps.setString(2, hashedPassword);
+                ps.executeUpdate();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
